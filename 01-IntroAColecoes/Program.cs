@@ -71,7 +71,60 @@ while (enumerador.MoveNext())
  
 */
 
+var semana = new DiasDaSemana();
+foreach (var dia in semana)
+{
+    Console.WriteLine(dia);
+}
 
+public class DiasDaSemanaEnumerator : IEnumerator<string>
+{
+    private readonly string[] dias = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+    private int posicao = -1;
+
+    public string Current
+    {
+        get
+        {
+            if (posicao <0 || posicao >= dias.Length)
+            {
+                throw new InvalidOperationException("Posição inválida.");
+            }
+            return dias[posicao];
+        }
+    }
+
+    object IEnumerator.Current => Current;
+
+    public void Dispose()
+    {
+        
+    }
+
+    public bool MoveNext()
+    {
+        posicao++;
+        return posicao < dias.Length;
+    }
+
+    public void Reset()
+    {
+        posicao = -1;
+    }
+}
+
+public class DiasDaSemana : IEnumerable<string>
+{
+    public IEnumerator<string> GetEnumerator()
+    {
+        return new DiasDaSemanaEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+}
 
 public class Produto
 {
