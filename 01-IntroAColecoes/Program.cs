@@ -117,7 +117,13 @@ public class DiasDaSemana : IEnumerable<string>
 {
     public IEnumerator<string> GetEnumerator()
     {
-        return new DiasDaSemanaEnumerator();
+        yield return "Domingo";
+        yield return "Segunda-feira";
+        yield return "Terça-feira";
+        yield return "Quarta-feira";
+        yield return "Quinta-feira";
+        yield return "Sexta-feira";
+        yield return "Sábado";
     }
 
     IEnumerator IEnumerable.GetEnumerator()
