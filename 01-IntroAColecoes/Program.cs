@@ -42,6 +42,8 @@ foreach (var musica in playlist)
 
 /*
     como o foreach funciona por baixo dos panos? 
+    a partir de um objeto responsável por "percorrer" a coleção: o enumerador.
+    olha só:
 */
 
 var enumerador = playlist.GetEnumerator();
@@ -52,10 +54,21 @@ while (enumerador.MoveNext())
     Console.WriteLine($"Título: {musica.Titulo}, Artista: {musica.Artista}");
 }
 
+/*
+    esse objeto implementa a interface IEnumerator:
+    https://learn.microsoft.com/pt-br/dotnet/api/system.collections.ienumerator
+    Recapitulando: IEnumerator tem os métodos MoveNext() e Reset(), e a propriedade Current. 
+*/
+
 // esse código é muito verboso, então o C# nos permite usar o foreach para simplificar :-)
 
+foreach (var musica in playlist) // pega o enumerador implicitamente, e usa MoveNext() e Current; LINDO!
+{
+    Console.WriteLine($"Título: {musica.Titulo}, Artista: {musica.Artista}");
+}
+
 /*
-    foreach só pode ser usado em coleções que implementam IEnumerable:
+    Então, pra fica bem claro: foreach só pode ser usado em coleções que implementam IEnumerable:
     https://learn.microsoft.com/pt-br/dotnet/csharp/language-reference/statements/iteration-statements#the-foreach-statement
 
     IEnumerable é uma interface que representa uma coleção que pode ser enumerada ("percorrida")
@@ -68,7 +81,10 @@ while (enumerador.MoveNext())
      }
 
     não vai funcionar, porque Musica não implementa IEnumerable.
- 
+    mas e se quisesse implementar a capacidade de enumeração em uma classe minha?
+    por exemplo, uma classe DiasDaSemana que representa os dias da semana e eu quero poder usar foreach nela?
+    aí eu teria que implementar IEnumerable<T> e criar um enumerador que implementa IEnumerator<T>.
+    onde T é string, porque os dias da semana são strings.
 */
 
 var semana = new DiasDaSemana();
@@ -117,9 +133,13 @@ public class DiasDaSemana : IEnumerable<string>
 {
     public IEnumerator<string> GetEnumerator()
     {
-        yield return "Domingo";
-        yield return "Segunda-feira";
-        yield return "Terça-feira";
+        // posicao = -1
+        //MoveNext(): posicao = 0
+        yield return "Domingo"; // Current: array[posicao]
+        //MoveNext(): posicao = 1
+        yield return "Segunda-feira"; // Current
+        //MoveNext(): posicao = 2
+        yield return "Terça-feira"; // Current
         yield return "Quarta-feira";
         yield return "Quinta-feira";
         yield return "Sexta-feira";
