@@ -40,6 +40,12 @@ TocarPlaylist(rockNacional);
 var playlistAleatoria = rockNacional.ModoAleatorio();
 TocarPlaylist(playlistAleatoria);
 
+var playlistPorDuracao = rockNacional.OrdenadaPor(new PorDuracaoComparer());
+TocarPlaylist(playlistPorDuracao);
+
+var playlistPorTitulo = rockNacional.OrdenadaPor(new PorTituloComparer());
+TocarPlaylist(playlistPorTitulo);
+
 
 void TocarPlaylist(Playlist playlist)
 {
@@ -51,12 +57,41 @@ void TocarPlaylist(Playlist playlist)
     Console.WriteLine("\nFim da playlist.\n");
 }
 
+class PorDuracaoComparer : IComparer<Musica>
+{
+    public int Compare(Musica? x, Musica? y)
+    {
+        if (x is null && y is null) return 0; // ambos são nulos, considerados iguais
+        if (x is null) return -1;
+        if (y is null) return 1;
+        return x.Duracao.CompareTo(y.Duracao); 
+    }
+}
 
-class Musica
+class PorTituloComparer : IComparer<Musica>
+{
+       public int Compare(Musica? x, Musica? y)
+    {
+        if (x is null && y is null) return 0; // ambos são nulos, considerados iguais
+        if (x is null) return -1;
+        if (y is null) return 1;
+        return x.Titulo.CompareTo(y.Titulo);
+    }
+}
+
+class Musica : IComparable<Musica>
 {
     public required string Titulo { get; set; }
     public required string Artista { get; set; }
     public required double Duracao { get; set; }
+
+    public int CompareTo(Musica? other)
+    {
+        if (other is null) return 1;
+        //return Duracao.CompareTo(other.Duracao); // usa duração para comparar as músicas
+        return Titulo.CompareTo(other.Titulo); // usa título para comparar as músicas
+    }
+
     public override string ToString()
     {
         return $"{Titulo} - {Artista} ({Duracao} min)";
@@ -94,6 +129,19 @@ class Playlist : IEnumerable<Musica>
     }
 
     public int TotalDeMusicas => _musicas.Count; // propriedade de List<T> 
+
+    public Playlist OrdenadaPor(IComparer<Musica> comparador)
+    {
+        List<Musica> novaList = [.. _musicas];
+
+        novaList.Sort(comparador);
+
+        return new Playlist
+        {
+            Nome = $"{this.Nome} (Ordenada)",
+            _musicas = novaList
+        };
+    }
 
     public Playlist ModoAleatorio()
     {
