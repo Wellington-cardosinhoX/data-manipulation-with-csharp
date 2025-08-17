@@ -5,9 +5,9 @@
     //     [x] Criar as classes para musicas e playlist
     //     [x] Listar músicas da playlist
     //     [x] Adicionar música à playlist
-    //     [ ] Obter uma música específica da playlist
-    //     [ ] Remover música da playlist
-    //     [ ] Reordenar músicas na playlist em modo aleatório 
+    //     [x] Obter uma música específica da playlist
+    //     [x] Remover música da playlist
+    //     [x] Tocar músicas da playlist em modo aleatório 
     //     [ ] Reordenar músicas segundo alguma lógica específica (ex. duração)
  
 */
@@ -21,11 +21,36 @@ rockNacional.AdicionarMusica(new Musica { Titulo = "Pro Dia Nascer Feliz", Artis
 rockNacional.AdicionarMusica(new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 });
 rockNacional.AdicionarMusica(new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 });
 
-Console.WriteLine($"Você está ouvindo a playlist '{rockNacional.Nome}' ({rockNacional.TotalDeMusicas} músicas)");
-foreach (var musica in rockNacional)
+TocarPlaylist(rockNacional);
+
+//var tituloABuscar = "Pro Dia Nascer Feliz";
+//var musicaEncontrada = rockNacional.ObterMusicaPorTitulo(tituloABuscar);
+//if (musicaEncontrada != null)
+//{
+//    Console.WriteLine($"Música encontrada: {musicaEncontrada}");
+//    rockNacional.RemoverMusicaPorTitulo(tituloABuscar);
+//}
+//else
+//{
+//    Console.WriteLine("Música não encontrada.");
+//}
+
+//TocarPlaylist(rockNacional);
+
+var playlistAleatoria = rockNacional.ModoAleatorio();
+TocarPlaylist(playlistAleatoria);
+
+
+void TocarPlaylist(Playlist playlist)
 {
-    Console.WriteLine($"\t - {musica}");
+    Console.WriteLine($"\nVocê está ouvindo a playlist '{playlist.Nome}' ({playlist.TotalDeMusicas} músicas)");
+    foreach (var musica in playlist)
+    {
+        Console.WriteLine($"\t - {musica}");
+    }
+    Console.WriteLine("\nFim da playlist.\n");
 }
+
 
 class Musica
 {
@@ -47,8 +72,70 @@ class Playlist : IEnumerable<Musica>
     {
         _musicas.Add(musica); // adiciona a música à lista
     }
+    public Musica? ObterMusicaPorTitulo(string titulo)
+    {
+        if (string.IsNullOrWhiteSpace(titulo)) return null;
+
+        foreach (var musica in _musicas)
+        {
+            if (musica.Titulo.Equals(titulo))
+            {
+                return musica; // retorna a música se o título for encontrado
+            }
+        }
+        return null; // retorna null se a música não for encontrada
+    }
+
+    public void RemoverMusicaPorTitulo(string titulo)
+    {
+        var musicaEncontrada = ObterMusicaPorTitulo(titulo);
+        if (musicaEncontrada is not null)
+            _musicas.Remove(musicaEncontrada); // remove a música da lista
+    }
 
     public int TotalDeMusicas => _musicas.Count; // propriedade de List<T> 
+
+    public Playlist ModoAleatorio()
+    {
+        // 1. Cria uma cópia da lista de músicas original.
+        //    Isso é importante para não modificar a ordem da playlist original
+        //    e para que a nova playlist aleatória contenha as mesmas músicas.
+        List<Musica> shuffledList = [.. _musicas]; // ou new List<Musica>(_musicas); ou new(_musicas);
+        Random random = new Random();
+
+        // 2. Implementação do algoritmo Fisher-Yates para embaralhar a lista.
+        //    Este algoritmo percorre a lista de trás para frente. Em cada passo,
+        //    ele troca o elemento atual com um elemento selecionado aleatoriamente
+        //    da parte "não embaralhada" da lista (do início até a posição atual).
+        //    Isso garante que cada elemento é acessado e movido apenas uma vez,
+        //    resultando em uma permutação aleatória de todos os elementos originais,
+        //    sem repetições ou omissões.
+        int n = shuffledList.Count;
+        while (n > 1)
+        {
+            n--; // Decrementa n para que o índice aleatório seja gerado entre 0 e n (inclusive)
+
+            // Gera um índice aleatório 'k' no intervalo [0, n].
+            // random.Next(maxValue) gera um número inteiro não negativo menor que maxValue.
+            // Então, random.Next(n + 1) gerará um índice de 0 a n.
+            int k = random.Next(n + 1);
+
+            // Realiza a troca:
+            // Salva o elemento na posição aleatória 'k'.
+            Musica value = shuffledList[k];
+            // Move o elemento da posição 'n' (o último da parte não embaralhada) para a posição 'k'.
+            shuffledList[k] = shuffledList[n];
+            // Coloca o elemento que estava em 'k' na posição 'n'.
+            shuffledList[n] = value;
+        }
+
+        // 3. Retorna uma nova instância de Playlist com a lista de músicas embaralhada.
+        return new Playlist
+        {
+            Nome = $"{this.Nome} (Modo Aleatório)", 
+            _musicas = shuffledList
+        };
+    }
 
     public IEnumerator<Musica> GetEnumerator()
     {
