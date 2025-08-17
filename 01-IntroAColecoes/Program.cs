@@ -93,6 +93,55 @@ foreach (var dia in semana)
     Console.WriteLine(dia);
 }
 
+/*
+ 
+    Vamos reforçar a importância do yield: 
+    - quando usamos um IEnumerable, precisamos de um IEnumerator para percorrer a coleção.
+    - quando implementamos IEnumerator (e seus membros MoveNext(), Current), acabamos criando uma coleção em memória, o que pode ser ineficiente.
+    - o yield faz com que esse trabalho seja delegado para o runtime do .NET, em tempo de execução, somente quando necessário usar algum item da coleção.
+    - por exemplo: quero usar a coleção DiasDaSemana para obter somente os três primeiros dias da semana.
+    - sem o yield, precisaríamos criar uma coleção em memória, com todos os itens, tremendo desperdício!
+    - com o yield, o enumerador só gera os dias quando necessário, economizando memória E processamento.
+    - imagina uma coleção com milhares de itens, e você só precisa de alguns poucos?
+    - outro exemplo: uma coleção que retorne números pares até um limite informado como parâmetro.
+ 
+*/
+
+static IEnumerable<int> NumerosPares(int limite)
+{
+    var resultado = new List<int>();
+    for(int i=0; i <= limite; i++)
+    {
+        if (i %2 == 0) resultado.Add(i);
+    }
+    return resultado;
+}
+
+static IEnumerable<int> NumerosParesComYield(int limite)
+{
+    Console.WriteLine("Vai executar?");
+    for (int i = 0; i <= limite; i++)
+    {
+        if (i % 2 == 0) yield return i;
+    }
+}
+
+var pares = NumerosParesComYield(20000); // vai preparar os itens a serem enumerados... 
+
+foreach (var par in pares) // ...só executa quando forem percorridos!
+{
+    Console.WriteLine(par);
+    if (par >= 200) break; // ...e quando necessários (sob demanda; no caso, 200)
+}
+
+return;
+
+/*
+    Então o yield traz: legibilidade, simplicidade e eficiência (economia de memória e processamento).
+    E quando podemos empregar o yield? Em métodos que retornam IEnumerable<T> ou IEnumerator<T>
+*/
+
+
 public class DiasDaSemanaEnumerator : IEnumerator<string>
 {
     private readonly string[] dias = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
@@ -151,6 +200,11 @@ public class DiasDaSemana : IEnumerable<string>
         return GetEnumerator();
     }
 }
+
+
+
+
+
 
 public class Produto
 {
