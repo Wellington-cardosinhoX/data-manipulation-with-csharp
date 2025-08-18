@@ -11,6 +11,9 @@
     //     [x] Reordenar músicas segundo alguma lógica específica (ex. duração)
     //     [x] Uma playlist não pode ter músicas repetidas
     //     [x] Exibir as 10 músicas mais tocadas em todas as playlists (ranking)
+    //     [x] Player de música com:
+    //     [x] - Fila de reprodução (para músicas avulsas e/ou playlists)
+    //     [x] - Histórico de reprodução
  
 */
 
@@ -25,7 +28,6 @@ rockNacional.AdicionarMusica(
     new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 },
     new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 }
 );
-TocarPlaylist(rockNacional);
 
 var playlistLegiaoUrbana = new Playlist { Nome = "Legião Urbana" };
 playlistLegiaoUrbana.AdicionarMusica(
@@ -34,10 +36,29 @@ playlistLegiaoUrbana.AdicionarMusica(
     new Musica { Titulo = "Que País É Este", Artista = "Legião Urbana", Duracao = 3.50 },
     new Musica { Titulo = "Há Tempos", Artista = "Legião Urbana", Duracao = 4.20 }
 );
-TocarPlaylist(playlistLegiaoUrbana);
 
-ExibirMusicasMaisTocadas(rockNacional, playlistLegiaoUrbana);
 
+var player = new Player();
+player.Adicionar(new Musica { Titulo = "Bohemian Rhapsody", Artista = "Queen", Duracao = 5.55 });
+player.Adicionar(rockNacional);
+player.ExibirFila();
+player.ExibirHistorico();
+
+player.Tocar(); 
+player.ExibirFila();
+player.ExibirHistorico();
+
+player.Tocar();
+player.ExibirFila();
+player.ExibirHistorico();
+
+player.Voltar();
+player.ExibirFila();
+player.ExibirHistorico();
+
+player.Tocar();
+player.ExibirFila();
+player.ExibirHistorico();
 
 void TocarPlaylist(Playlist playlist)
 {
@@ -274,7 +295,7 @@ class Playlist : ICollection<Musica>
 
     public void CopyTo(Musica[] array, int arrayIndex)
     {
-        throw new NotImplementedException();
+        _musicas.CopyTo(array, arrayIndex);
     }
 
     public bool Remove(Musica musica)
@@ -295,5 +316,61 @@ class Playlist : ICollection<Musica>
     IEnumerator IEnumerable.GetEnumerator()
     {
         return GetEnumerator();
+    }
+}
+
+class Player
+{
+    private Queue<Musica> _fila = [];
+    private Stack<Musica> _historico = [];
+    public void Adicionar(Musica musica)
+    {
+        _fila.Enqueue(musica);
+    }
+
+    public void Adicionar(Playlist playlist)
+    {
+        foreach (var musica in playlist)
+        {
+            _fila.Enqueue(musica);
+        }
+    }
+
+    public void ExibirFila()
+    {
+        Console.WriteLine("\nFila de reprodução:");
+        foreach (var musica in _fila)
+        {
+            Console.WriteLine($"\t-{musica}");
+        }
+    }
+
+    public void ExibirHistorico()
+    {
+        Console.WriteLine("\nHistórico de reprodução:");
+        foreach (var musica in _historico)
+        {
+            Console.WriteLine($"\t-{musica}");
+        }
+    }
+
+    public void Tocar()
+    {
+        // toca a primeira música da fila
+        var musica = _fila.Dequeue();
+        Console.WriteLine($"\nTocando: {musica}");
+        _historico.Push(musica); // adiciona a música ao histórico
+    }
+
+    public void Voltar()
+    {
+        // toca a primeira música do histórico
+        var musica = _historico.Peek();
+        Console.WriteLine($"\nVoltando e Tocando: {musica}");
+    }
+
+    public void Avancar()
+    {
+        _fila.Dequeue(); // remove a música da fila sem tocar
     }
 }
