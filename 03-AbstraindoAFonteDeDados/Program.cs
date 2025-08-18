@@ -2,9 +2,10 @@
 
 
 /*
-    Seja um arquivo com músicas em formato CSV (Comma Separated Values). Leia-o como uma coleção de músicas e implemente as seguintes funções abaixo:
+    Seja um arquivo com músicas em formato CSV (Comma Separated Values). 
 
-    Funções que vamos implementar:
+    Implemente as funções abaixo:
+    //     [x] Leia-o como uma coleção de músicas
     //     [ ] Filtre a coleção por artista (por ex. Coldplay, Metallica, AC/DC)
     //     [ ] Filtre a coleção por gênero (por ex. rock)
     //     [ ] Filtre a coleção por duração (por ex. maiores que 5 minutos)
@@ -20,18 +21,19 @@
 using var stream = new FileStream("musicas.csv", FileMode.Open, FileAccess.Read);
 using var leitor = new StreamReader(stream);
 
-var musicas = MusicasDoColdplay(leitor);
+//var musicas = MusicasDoArtista(MusicasDoCsv(leitor), "Coldplay");
+var musicas = MusicasDoCsv(leitor).DoArtista("Coldplay");
+
 int contador = 1;
 foreach (var musica in musicas)
 {
     Console.WriteLine(musica);
-    if (contador > 20) break;
+    if (contador >= 20) break;
     contador++;
 }
 
-IEnumerable<Musica> MusicasDoColdplay(StreamReader leitor)
+IEnumerable<Musica> MusicasDoCsv(StreamReader leitor)
 {
-    var lista = new List<Musica>();
     var linha = leitor.ReadLine();
     var numLinha = 1;
     while(linha != null)
@@ -45,11 +47,10 @@ IEnumerable<Musica> MusicasDoColdplay(StreamReader leitor)
             Artista = partes[1],
             Duracao = Convert.ToInt32(partes[2])
         };
-        if (musica.Artista == "Coldplay") lista.Add(musica);
+        yield return musica;
         linha = leitor.ReadLine();
         numLinha++;
     }
-    return lista;
 }
 
 
@@ -101,6 +102,18 @@ void ExibirMusicasMaisTocadas(params Playlist[] playlists)
     }
 
 }
+
+static class MusicaExtensions
+{
+    public static IEnumerable<Musica> DoArtista(this IEnumerable<Musica> musicas, string artista)
+    {
+        foreach (var musica in musicas)
+        {
+            if (musica.Artista == artista) yield return musica;
+        }
+    }
+}
+
 
 class PorDuracaoComparer : IComparer<Musica>
 {
