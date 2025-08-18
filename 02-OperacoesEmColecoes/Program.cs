@@ -41,7 +41,7 @@ ExibirMusicasMaisTocadas(rockNacional, playlistLegiaoUrbana);
 
 void TocarPlaylist(Playlist playlist)
 {
-    Console.WriteLine($"\nVocê está ouvindo a playlist '{playlist.Nome}' ({playlist.TotalDeMusicas} músicas)");
+    Console.WriteLine($"\nVocê está ouvindo a playlist '{playlist.Nome}' ({playlist.Count} músicas)");
     foreach (var musica in playlist)
     {
         Console.WriteLine($"\t - {musica}");
@@ -154,7 +154,7 @@ class Musica : IComparable<Musica>
     }
 }
 
-class Playlist : IEnumerable<Musica>
+class Playlist : ICollection<Musica>
 {
     // Musica[] _musicas = new Musica[10]; poderíamos usar um array, mas precisaríamos gerenciar manualmente a expansão e compressão da coleção quando incluíssemos ou excluíssemos; existe uma estrutura mais flexível e eficiente (e Orientada a Objetos!) para isso: List<T>
     private List<Musica> _musicas = []; // ou new List<Musica>(); ou new();
@@ -165,12 +165,7 @@ class Playlist : IEnumerable<Musica>
     {
         foreach (var musica in musicas)
         {
-            // adiciona a música ao HashSet, se ela não existir
-            // se existir, retorna false e não adiciona
-            if (_musicasSet.Add(musica))
-            {
-                _musicas.Add(musica); // adiciona a música à lista
-            }
+            this.Add(musica); 
         }
     }
     public Musica? ObterMusicaPorTitulo(string titulo)
@@ -197,7 +192,9 @@ class Playlist : IEnumerable<Musica>
         }
     }
 
-    public int TotalDeMusicas => _musicas.Count; // propriedade de List<T> 
+    public int Count => _musicasSet.Count;
+
+    public bool IsReadOnly => false;
 
     public Playlist OrdenadaPor(IComparer<Musica> comparador)
     {
@@ -252,6 +249,42 @@ class Playlist : IEnumerable<Musica>
             Nome = $"{this.Nome} (Modo Aleatório)", 
             _musicas = shuffledList
         };
+    }
+
+    public void Add(Musica musica)
+    {
+        // adiciona a música ao HashSet, se ela não existir
+        // se existir, retorna false e não adiciona
+        if (_musicasSet.Add(musica))
+        {
+            _musicas.Add(musica); // adiciona a música à lista
+        }
+    }
+
+    public void Clear()
+    {
+        _musicas.Clear();
+        _musicasSet.Clear();
+    }
+
+    public bool Contains(Musica item)
+    {
+        return _musicasSet.Contains(item);
+    }
+
+    public void CopyTo(Musica[] array, int arrayIndex)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool Remove(Musica musica)
+    {
+        if (_musicasSet.Remove(musica))
+        {
+            _musicas.Remove(musica); // remove a música da lista
+            return true;
+        }
+        return false;
     }
 
     public IEnumerator<Musica> GetEnumerator()
