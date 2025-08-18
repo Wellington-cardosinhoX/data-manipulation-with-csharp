@@ -6,11 +6,11 @@
 
     Implemente as funções abaixo:
     //     [x] Leia-o como uma coleção de músicas
-    //     [ ] Filtre a coleção por artista (por ex. Coldplay, Metallica, AC/DC)
-    //     [ ] Filtre a coleção por gênero (por ex. rock)
-    //     [ ] Filtre a coleção por duração (por ex. maiores que 5 minutos)
-    //     [ ] Ordene a coleção por artista
-    //     [ ] Ordene a coleção por artista e em seguida por músicas com duração crescente
+    //     [x] Filtre a coleção por artista (por ex. Coldplay, Metallica, AC/DC)
+    //     [x] Filtre a coleção por gênero (por ex. rock)
+    //     [x] Filtre a coleção por duração (por ex. maiores que 5 minutos)
+    //     [x] Ordene a coleção por artista
+    //     [x] Ordene a coleção por artista e em seguida por músicas com duração crescente
     //     [ ] Crie uma coleção de artistas e suas músicas
     //     [ ] Informe a duração média das músicas da coleção
     //     [ ] Informe a duração total das músicas da coleção
@@ -21,25 +21,18 @@
 using var stream = new FileStream("musicas.csv", FileMode.Open, FileAccess.Read);
 using var leitor = new StreamReader(stream);
 
+// a partir do yield, dos métodos de extensão, das expressões lambda
+// é possível compor funções para obter novas coleções
+// a partir de operações que manipulam coleções de entrada
 
-Func<Musica, bool>? filtro = MusicaTituloComecaComLetraT;
+// isso permite separar a obtenção dos dados de origem
+// das operações que os manipulam
+var musicas = MusicasDoCsv(leitor)          // coleção de origem
+    .Where(m => m.Titulo.StartsWith('T'))   // operação de filtro
+    .OrderBy(m => m.Artista)                // operação de ordenação  
+    .ThenBy(m => m.Duracao);                // outra operação de ordenação  
 
-/*
-1. bool MusicaTituloComecaComLetraT(Musica musica)
-    {
-        return musica.Titulo.StartsWith('T');
-    } 
-
-2. bool MusicaTituloComecaComLetraT(Musica musica) => musica.Titulo.StartsWith('T');
-
-3. musica => musica.Titulo.StartsWith('T')
-
-*/
-
-filtro = musica => musica.Titulo.StartsWith('X');
-
-//var musicas = MusicasDoCsv(leitor).FiltradasPor(filtro);
-var musicas = MusicasDoCsv(leitor).FiltradasPor(m => m.Titulo.StartsWith('C'));
+// LINQ! Language Integrated Query
 
 int contador = 1;
 foreach (var musica in musicas)
@@ -52,10 +45,10 @@ foreach (var musica in musicas)
 IEnumerable<Musica> MusicasDoCsv(StreamReader leitor)
 {
     var linha = leitor.ReadLine();
-    var numLinha = 1;
+    //var numLinha = 1;
     while(linha != null)
     {
-        Console.WriteLine($"\nProcessando linha {numLinha}...");
+        //Console.WriteLine($"\nProcessando linha {numLinha}...");
         var partes = linha.Split(';');
         if (partes.Length != 4) continue;
         var musica = new Musica
@@ -66,7 +59,7 @@ IEnumerable<Musica> MusicasDoCsv(StreamReader leitor)
         };
         yield return musica;
         linha = leitor.ReadLine();
-        numLinha++;
+        //numLinha++;
     }
 }
 
