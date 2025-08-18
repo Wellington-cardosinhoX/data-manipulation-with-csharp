@@ -21,9 +21,25 @@
 using var stream = new FileStream("musicas.csv", FileMode.Open, FileAccess.Read);
 using var leitor = new StreamReader(stream);
 
-//var musicas = MusicasDoArtista(MusicasDoCsv(leitor), "Coldplay");
-var musicas = MusicasDoCsv(leitor)
-    .FiltradasPor(MusicaTemDuracaoMaiorQue5Minutos);
+
+Func<Musica, bool>? filtro = MusicaTituloComecaComLetraT;
+
+/*
+1. bool MusicaTituloComecaComLetraT(Musica musica)
+    {
+        return musica.Titulo.StartsWith('T');
+    } 
+
+2. bool MusicaTituloComecaComLetraT(Musica musica) => musica.Titulo.StartsWith('T');
+
+3. musica => musica.Titulo.StartsWith('T')
+
+*/
+
+filtro = musica => musica.Titulo.StartsWith('X');
+
+//var musicas = MusicasDoCsv(leitor).FiltradasPor(filtro);
+var musicas = MusicasDoCsv(leitor).FiltradasPor(m => m.Titulo.StartsWith('C'));
 
 int contador = 1;
 foreach (var musica in musicas)
