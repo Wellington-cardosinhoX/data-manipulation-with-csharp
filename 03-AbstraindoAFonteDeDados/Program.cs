@@ -22,7 +22,8 @@ using var stream = new FileStream("musicas.csv", FileMode.Open, FileAccess.Read)
 using var leitor = new StreamReader(stream);
 
 //var musicas = MusicasDoArtista(MusicasDoCsv(leitor), "Coldplay");
-var musicas = MusicasDoCsv(leitor).DoArtista("Coldplay");
+var musicas = MusicasDoCsv(leitor)
+    .FiltradasPor(MusicaTemDuracaoMaiorQue5Minutos);
 
 int contador = 1;
 foreach (var musica in musicas)
@@ -52,7 +53,6 @@ IEnumerable<Musica> MusicasDoCsv(StreamReader leitor)
         numLinha++;
     }
 }
-
 
 void TocarPlaylist(Playlist playlist)
 {
@@ -103,13 +103,30 @@ void ExibirMusicasMaisTocadas(params Playlist[] playlists)
 
 }
 
+bool MusicaPertenceAoColdplay(Musica musica)
+{
+    return musica.Artista == "Coldplay";
+}
+
+bool MusicaTemDuracaoMaiorQue5Minutos(Musica musica)
+{
+    return musica.Duracao > 300;
+}
+
+bool MusicaTituloComecaComLetraT(Musica musica)
+{
+    return musica.Titulo.StartsWith('T');
+}
+
+
 static class MusicaExtensions
 {
-    public static IEnumerable<Musica> DoArtista(this IEnumerable<Musica> musicas, string artista)
+    public static IEnumerable<Musica> FiltradasPor(this IEnumerable<Musica> musicas, Func<Musica, bool> condicao)
     {
         foreach (var musica in musicas)
         {
-            if (musica.Artista == artista) yield return musica;
+            // condição: função que, ao ser executada, retorna true/false
+            if (condicao(musica)) yield return musica;
         }
     }
 }
