@@ -8,7 +8,9 @@
     //     [x] Obter uma música específica da playlist
     //     [x] Remover música da playlist
     //     [x] Tocar músicas da playlist em modo aleatório 
-    //     [ ] Reordenar músicas segundo alguma lógica específica (ex. duração)
+    //     [x] Reordenar músicas segundo alguma lógica específica (ex. duração)
+    //     [x] Uma playlist não pode ter músicas repetidas
+    //     [x] Exibir as 10 músicas mais tocadas em todas as playlists (ranking)
  
 */
 
@@ -19,6 +21,7 @@ var rockNacional = new Playlist { Nome = "Músicas de Rock nacionais" };
 rockNacional.AdicionarMusica(new Musica { Titulo = "Tempo Perdido", Artista = "Legião Urbana", Duracao = 4.55 });
 rockNacional.AdicionarMusica(new Musica { Titulo = "Pro Dia Nascer Feliz", Artista = "Barão Vermelho", Duracao = 3.45 });
 rockNacional.AdicionarMusica(new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 });
+rockNacional.AdicionarMusica(new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 });
 rockNacional.AdicionarMusica(new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 });
 
 TocarPlaylist(rockNacional);
@@ -37,14 +40,27 @@ TocarPlaylist(rockNacional);
 
 //TocarPlaylist(rockNacional);
 
-var playlistAleatoria = rockNacional.ModoAleatorio();
-TocarPlaylist(playlistAleatoria);
+//var playlistAleatoria = rockNacional.ModoAleatorio();
+//TocarPlaylist(playlistAleatoria);
 
-var playlistPorDuracao = rockNacional.OrdenadaPor(new PorDuracaoComparer());
-TocarPlaylist(playlistPorDuracao);
+//var playlistPorDuracao = rockNacional.OrdenadaPor(new PorDuracaoComparer());
+//TocarPlaylist(playlistPorDuracao);
 
-var playlistPorTitulo = rockNacional.OrdenadaPor(new PorTituloComparer());
-TocarPlaylist(playlistPorTitulo);
+//var playlistPorTitulo = rockNacional.OrdenadaPor(new PorTituloComparer());
+//TocarPlaylist(playlistPorTitulo);
+
+
+
+var playlistLegiaoUrbana = new Playlist { Nome = "Legião Urbana" };
+playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 });
+playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Faroeste Caboclo", Artista = "Legião Urbana", Duracao = 9.30 });
+playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Que País É Este", Artista = "Legião Urbana", Duracao = 3.50 });
+playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Há Tempos", Artista = "Legião Urbana", Duracao = 4.20 });
+
+TocarPlaylist(playlistLegiaoUrbana);
+
+ExibirMusicasMaisTocadas(rockNacional, playlistLegiaoUrbana);
+
 
 
 void TocarPlaylist(Playlist playlist)
@@ -55,6 +71,53 @@ void TocarPlaylist(Playlist playlist)
         Console.WriteLine($"\t - {musica}");
     }
     Console.WriteLine("\nFim da playlist.\n");
+}
+
+
+void ExibirMusicasMaisTocadas(Playlist playlist1, Playlist playlist2)
+{
+    // criar uma "planilha" contendo duas colunas:
+    // - a música
+    // - o total de vezes que ela foi incluída em playlists
+
+    // a representação de uma planilha de duas colunas em C# é o Dictionary
+    // para os valores que queremos => Dictionary<Musica, int>
+    Dictionary<Musica, int> ranking = new();
+    foreach (var musica in playlist1)
+    {
+        if (ranking.TryGetValue(musica, out int value))
+        {
+            ranking[musica] = ++value;
+        }
+        else // música ainda não está no ranking
+        {
+            ranking[musica] = 1; // inclui a música com total 1
+        }
+    }
+
+    foreach (var musica in playlist2)
+    {
+        if (ranking.TryGetValue(musica, out int value))
+        {
+            ranking[musica] = ++value;
+        }
+        else // música ainda não está no ranking
+        {
+            ranking[musica] = 1; // inclui a música com total 1
+        }
+    }
+
+    // ordenar o ranking por total de vezes que a música foi incluída sem usar LINQ
+
+    Console.WriteLine("\n\nRanking das 10 músicas mais tocadas:");
+    var rankingOrdenado = new List<KeyValuePair<Musica, int>>(ranking);
+    rankingOrdenado.Sort(new PorTotalComparer()); 
+    for (var i = 0; i < Math.Min(10, rankingOrdenado.Count); i++)
+    {
+        var parMusicaTotal = rankingOrdenado[i];
+        Console.WriteLine($"{i + 1}º lugar - {parMusicaTotal.Key} ({parMusicaTotal.Value} vezes)");
+    }
+
 }
 
 class PorDuracaoComparer : IComparer<Musica>
@@ -79,6 +142,14 @@ class PorTituloComparer : IComparer<Musica>
     }
 }
 
+class PorTotalComparer : IComparer<KeyValuePair<Musica, int>>
+{
+    public int Compare(KeyValuePair<Musica, int> menor, KeyValuePair<Musica, int> maior)
+    {
+        return maior.Value.CompareTo(menor.Value); // ordena do maior para o menor
+    }
+}
+
 class Musica : IComparable<Musica>
 {
     public required string Titulo { get; set; }
@@ -96,16 +167,40 @@ class Musica : IComparable<Musica>
     {
         return $"{Titulo} - {Artista} ({Duracao} min)";
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (obj is Musica outraMusica)
+        {
+            return this.Titulo.Equals(outraMusica.Titulo) 
+                && this.Artista.Equals(outraMusica.Artista);
+        }
+        return false; // se não for do tipo Musica, retorna false
+    }
+
+    public override int GetHashCode()
+    {
+        // comparação bit a bit dos dois números (gerados em Titulo e Artista), ajudando a misturá-los e garantir baixa probabilidade de colisão
+        return this.Titulo.GetHashCode() ^ this.Artista.GetHashCode();
+    }
 }
 
 class Playlist : IEnumerable<Musica>
 {
     // Musica[] _musicas = new Musica[10]; poderíamos usar um array, mas precisaríamos gerenciar manualmente a expansão e compressão da coleção quando incluíssemos ou excluíssemos; existe uma estrutura mais flexível e eficiente (e Orientada a Objetos!) para isso: List<T>
     private List<Musica> _musicas = []; // ou new List<Musica>(); ou new();
+    private HashSet<Musica> _musicasSet = new(); // ou new HashSet<Musica>();
+
     public required string Nome { get; set; }
     public void AdicionarMusica(Musica musica)
     {
-        _musicas.Add(musica); // adiciona a música à lista
+        // adiciona a música ao HashSet, se ela não existir
+        // se existir, retorna false e não adiciona
+        if (_musicasSet.Add(musica)) 
+        {
+            _musicas.Add(musica); // adiciona a música à lista
+        }
     }
     public Musica? ObterMusicaPorTitulo(string titulo)
     {
@@ -125,7 +220,10 @@ class Playlist : IEnumerable<Musica>
     {
         var musicaEncontrada = ObterMusicaPorTitulo(titulo);
         if (musicaEncontrada is not null)
+        {
+            _musicasSet.Remove(musicaEncontrada); // remove a música do HashSet
             _musicas.Remove(musicaEncontrada); // remove a música da lista
+        }
     }
 
     public int TotalDeMusicas => _musicas.Count; // propriedade de List<T> 
