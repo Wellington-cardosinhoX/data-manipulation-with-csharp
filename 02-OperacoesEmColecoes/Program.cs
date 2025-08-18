@@ -18,49 +18,25 @@ using System.Collections;
 
 var rockNacional = new Playlist { Nome = "Músicas de Rock nacionais" };
 
-rockNacional.AdicionarMusica(new Musica { Titulo = "Tempo Perdido", Artista = "Legião Urbana", Duracao = 4.55 });
-rockNacional.AdicionarMusica(new Musica { Titulo = "Pro Dia Nascer Feliz", Artista = "Barão Vermelho", Duracao = 3.45 });
-rockNacional.AdicionarMusica(new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 });
-rockNacional.AdicionarMusica(new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 });
-rockNacional.AdicionarMusica(new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 });
-
+rockNacional.AdicionarMusica(
+    new Musica { Titulo = "Tempo Perdido", Artista = "Legião Urbana", Duracao = 4.55 },
+    new Musica { Titulo = "Pro Dia Nascer Feliz", Artista = "Barão Vermelho", Duracao = 3.45 },
+    new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 },
+    new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 },
+    new Musica { Titulo = "Geração Coca-Cola", Artista = "Legião Urbana", Duracao = 3.50 }
+);
 TocarPlaylist(rockNacional);
 
-//var tituloABuscar = "Pro Dia Nascer Feliz";
-//var musicaEncontrada = rockNacional.ObterMusicaPorTitulo(tituloABuscar);
-//if (musicaEncontrada != null)
-//{
-//    Console.WriteLine($"Música encontrada: {musicaEncontrada}");
-//    rockNacional.RemoverMusicaPorTitulo(tituloABuscar);
-//}
-//else
-//{
-//    Console.WriteLine("Música não encontrada.");
-//}
-
-//TocarPlaylist(rockNacional);
-
-//var playlistAleatoria = rockNacional.ModoAleatorio();
-//TocarPlaylist(playlistAleatoria);
-
-//var playlistPorDuracao = rockNacional.OrdenadaPor(new PorDuracaoComparer());
-//TocarPlaylist(playlistPorDuracao);
-
-//var playlistPorTitulo = rockNacional.OrdenadaPor(new PorTituloComparer());
-//TocarPlaylist(playlistPorTitulo);
-
-
-
 var playlistLegiaoUrbana = new Playlist { Nome = "Legião Urbana" };
-playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 });
-playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Faroeste Caboclo", Artista = "Legião Urbana", Duracao = 9.30 });
-playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Que País É Este", Artista = "Legião Urbana", Duracao = 3.50 });
-playlistLegiaoUrbana.AdicionarMusica(new Musica { Titulo = "Há Tempos", Artista = "Legião Urbana", Duracao = 4.20 });
-
+playlistLegiaoUrbana.AdicionarMusica(
+    new Musica { Titulo = "Eduardo e Mônica", Artista = "Legião Urbana", Duracao = 5.30 },
+    new Musica { Titulo = "Faroeste Caboclo", Artista = "Legião Urbana", Duracao = 9.30 },
+    new Musica { Titulo = "Que País É Este", Artista = "Legião Urbana", Duracao = 3.50 },
+    new Musica { Titulo = "Há Tempos", Artista = "Legião Urbana", Duracao = 4.20 }
+);
 TocarPlaylist(playlistLegiaoUrbana);
 
 ExibirMusicasMaisTocadas(rockNacional, playlistLegiaoUrbana);
-
 
 
 void TocarPlaylist(Playlist playlist)
@@ -74,7 +50,7 @@ void TocarPlaylist(Playlist playlist)
 }
 
 
-void ExibirMusicasMaisTocadas(Playlist playlist1, Playlist playlist2)
+void ExibirMusicasMaisTocadas(params Playlist[] playlists)
 {
     // criar uma "planilha" contendo duas colunas:
     // - a música
@@ -83,27 +59,19 @@ void ExibirMusicasMaisTocadas(Playlist playlist1, Playlist playlist2)
     // a representação de uma planilha de duas colunas em C# é o Dictionary
     // para os valores que queremos => Dictionary<Musica, int>
     Dictionary<Musica, int> ranking = new();
-    foreach (var musica in playlist1)
-    {
-        if (ranking.TryGetValue(musica, out int value))
-        {
-            ranking[musica] = ++value;
-        }
-        else // música ainda não está no ranking
-        {
-            ranking[musica] = 1; // inclui a música com total 1
-        }
-    }
 
-    foreach (var musica in playlist2)
+    foreach (var playlist in playlists)
     {
-        if (ranking.TryGetValue(musica, out int value))
+        foreach (var musica in playlist)
         {
-            ranking[musica] = ++value;
-        }
-        else // música ainda não está no ranking
-        {
-            ranking[musica] = 1; // inclui a música com total 1
+            if (ranking.TryGetValue(musica, out int value))
+            {
+                ranking[musica] = ++value;
+            }
+            else // música ainda não está no ranking
+            {
+                ranking[musica] = 1; // inclui a música com total 1
+            }
         }
     }
 
@@ -193,13 +161,16 @@ class Playlist : IEnumerable<Musica>
     private HashSet<Musica> _musicasSet = new(); // ou new HashSet<Musica>();
 
     public required string Nome { get; set; }
-    public void AdicionarMusica(Musica musica)
+    public void AdicionarMusica(params Musica[] musicas)
     {
-        // adiciona a música ao HashSet, se ela não existir
-        // se existir, retorna false e não adiciona
-        if (_musicasSet.Add(musica)) 
+        foreach (var musica in musicas)
         {
-            _musicas.Add(musica); // adiciona a música à lista
+            // adiciona a música ao HashSet, se ela não existir
+            // se existir, retorna false e não adiciona
+            if (_musicasSet.Add(musica))
+            {
+                _musicas.Add(musica); // adiciona a música à lista
+            }
         }
     }
     public Musica? ObterMusicaPorTitulo(string titulo)
