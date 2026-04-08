@@ -26,6 +26,7 @@ a reordenação flexível dentro das playlists e a seleção de faixas tanto em 
 
 using System.Collections;
 using System.ComponentModel;
+using System.Globalization;
 
 var musica1 = new Musica { Titulo = "Que País é esse?", Artista = "Legião Urbana", Duracao = 350 };
 
@@ -48,6 +49,21 @@ rockNacional.Add(musica4);
 
 
 ExibirPlaylist(rockNacional);
+
+var musicaEncontrada = rockNacional.ObterPeloTitulo("Que País é esse?");
+
+if (musicaEncontrada is not null)
+{
+    Console.WriteLine("\nRemovendo música...");
+    rockNacional.Remove(musicaEncontrada);
+}
+else
+{
+    Console.WriteLine("\nMúsica não encontrada");
+}
+
+ExibirPlaylist(rockNacional);
+
 
 void ExibirPlaylist(Playlist playlist)
 {
@@ -93,6 +109,17 @@ public class Playlist : ICollection<Musica>
     public void CopyTo(Musica[] array, int arrayIndex)
     {
         lista.CopyTo(array, arrayIndex);
+    }
+
+
+    public Musica? ObterPeloTitulo(string nome)
+    {
+        foreach (var musica in lista)
+        {
+            if (musica.Titulo == nome) return musica;
+        }
+
+        return null;
     }
 
     public IEnumerator<Musica> GetEnumerator()
