@@ -178,6 +178,13 @@ else
 
 ExibirFila(player);
 
+var ultimoElemento = player.PegarUltimoElemento();
+
+if (ultimoElemento is not null)
+{
+    Console.WriteLine($"Último elemento dessa lista de música é: {ultimoElemento.Titulo}");
+}
+
 void ExibirFila(PlayDeMusica playDeMusica)
 {
     Console.WriteLine("\nExibindo lista de produções: ");
@@ -327,11 +334,11 @@ public class Playlist : ICollection<Musica>
 
 public class PlayDeMusica
 {
-    private List<Musica> fila = [];
+    private Queue<Musica> fila = [];
 
     public void AdicionarNaFila(Musica musica)
     {
-        fila.Add(musica);
+        fila.Enqueue(musica);
     }
 
     public void AdicionarNaFila(Playlist playlist)
@@ -345,9 +352,8 @@ public class PlayDeMusica
     public Musica? ProximaMusicaDaFila()
     {
         if (fila.Count == 0) return null;
-        var musica = fila.First();
-        fila.Remove(musica);
-        return musica;
+        
+        return fila.Dequeue();
     }
 
     public Musica? PegarUltimoElemento()
