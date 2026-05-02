@@ -165,7 +165,9 @@ player.AdicionarNaFila(rockNacional);
 
 ExibirFila(player);
 
+
 var proxima = player.ProximaMusicaDaFila();
+
 
 if (proxima is not null)
 {
@@ -185,6 +187,29 @@ if (ultimoElemento is not null)
     Console.WriteLine($"Último elemento dessa lista de música é: {ultimoElemento.Titulo}");
 }
 
+
+
+ExibirHistorico(player);
+
+
+
+void ExibirHistorico(PlayDeMusica player)
+{
+    Console.WriteLine("\nExibindo histórico");
+
+    foreach (var musica in player.Historico())
+    {
+        Console.WriteLine($"\t - Tocando música agora: {musica.Titulo}");
+    }
+}
+
+var musicaAnterior = player.MusicaAnterior();
+
+if (musicaAnterior is not null)
+{
+    Console.WriteLine($"Música anterior: {musicaAnterior.Titulo}");
+}
+
 void ExibirFila(PlayDeMusica playDeMusica)
 {
     Console.WriteLine("\nExibindo lista de produções: ");
@@ -193,6 +218,11 @@ void ExibirFila(PlayDeMusica playDeMusica)
         Console.WriteLine($"\t - Tocando música agora: {musica.Titulo}");
     }
 }
+
+ExibirHistorico(player);
+
+
+ExibirFila(player);
 
 public class PorContagem : IComparer<KeyValuePair<Musica, int>>
 {
@@ -334,7 +364,9 @@ public class Playlist : ICollection<Musica>
 
 public class PlayDeMusica
 {
-    private Queue<Musica> fila = [];
+    private Queue<Musica> fila = []; // primeiro a entrar, primeiro a sair
+
+    private Stack<Musica> pilha = []; // ultimo a entrar, primeiro a sair
 
     public void AdicionarNaFila(Musica musica)
     {
@@ -353,7 +385,18 @@ public class PlayDeMusica
     {
         if (fila.Count == 0) return null;
         
-        return fila.Dequeue();
+        var musica = fila.Dequeue();
+
+        pilha.Push(musica);
+
+        return musica;
+    }
+
+    public Musica? MusicaAnterior()
+    {
+        if (pilha.Count == 0) return null;
+
+        return pilha.Pop();
     }
 
     public Musica? PegarUltimoElemento()
@@ -367,5 +410,13 @@ public class PlayDeMusica
         {
             yield return musica; // yield retorna 1 musica por vez, visando performance e economia de memoria. Ele não retrnoatudo de uma vez
         } 
+    }
+
+    public IEnumerable<Musica> Historico()
+    {
+        foreach (var musica in pilha)
+        {
+            yield return musica;
+        }
     }
 }
